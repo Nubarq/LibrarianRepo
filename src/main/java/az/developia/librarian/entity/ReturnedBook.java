@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
+@Table(name = "returned_books")
 @Getter
 public class ReturnedBook {
     @Id
@@ -24,7 +25,7 @@ public class ReturnedBook {
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
-    private User user; // The student returning the book
+    private Student student; // The student returning the book
 
     private LocalDateTime returnedDate;
     private double fineAmount;

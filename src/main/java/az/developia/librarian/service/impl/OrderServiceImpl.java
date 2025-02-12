@@ -36,7 +36,7 @@ public class OrderServiceImpl implements OrderService {
 
         // Filter books where returnedDate is null and studentId matches
         return allBorrowedBooks.stream()
-                .filter(bb -> bb.getReturnedDate() == null && bb.getUser().getId().equals(studentId))
+                .filter(bb -> bb.getReturnedDate() == null && bb.getStudent().getId().equals(studentId))
                 .collect(Collectors.toList());
     }
 

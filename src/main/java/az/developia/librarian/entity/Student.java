@@ -2,39 +2,40 @@ package az.developia.librarian.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "students")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Setter
-@Getter
-@Table(name = "books")
-public class Book {
+public class Student {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    private String title;
-    private String author;
-    private String isbn;
-    private int publicationYear;
-    private int quantity;
+    private String name;
+
+    private String email;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     // One-to-Many relationship with BorrowedBook
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BorrowedBook> borrowedBooks = new ArrayList<>();
 
     // One-to-Many relationship with ReturnedBook
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReturnedBook> returnedBooks = new ArrayList<>();
 }

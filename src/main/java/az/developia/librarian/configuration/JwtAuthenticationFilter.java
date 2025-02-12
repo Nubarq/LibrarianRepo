@@ -1,79 +1,67 @@
 package az.developia.librarian.configuration;
 
 import az.developia.librarian.service.JWTService;
-import az.developia.librarian.service.StudentService;
+
+import az.developia.librarian.utility.JwtUtil;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collection;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JWTService jwtService;
-    private final StudentService userService;
-    @Autowired
-    private final StudentService studentService;
+    private final JwtUtil jwtUtil;
 
     @Override
-    protected void doFilterInternal( @NotNull HttpServletRequest request,
-                                     @NotNull HttpServletResponse response,
-                                     @NotNull FilterChain filterChain
-    ) throws ServletException, IOException {
-
-        final String authHeader= request.getHeader("Authorization");
-        final String jwt;
-        final String useremail;
-        if (authHeader == null || !authHeader.startsWith("Bearer ")){
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-
-        jwt = authHeader.substring(7);
-
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
         try {
-            useremail = jwtService.extractUsername(jwt);
-        } catch (MalformedJwtException e) {
-            logger.error("Malformed JWT: " + jwt, e);
-            filterChain.doFilter(request, response);
-            return;
-        } catch (Exception e) {
-            logger.error("JWT parsing error: " + jwt, e);
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-
-        if (StringUtils.isNotEmpty(useremail) && SecurityContextHolder.getContext().getAuthentication()==null){
-            UserDetails userDetails = studentService.userDetailsService().loadUserByUsername(useremail);
-
-
-            if (jwtService.isTokenValid(jwt , userDetails)){
-                SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
-                UsernamePasswordAuthenticationToken token= new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities()
-                );
-                token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                securityContext.setAuthentication(token);
-                SecurityContextHolder.setContext(securityContext);
+            String accessToken = jwtUtil.resolveToken(request);
+            if (accessToken == null ) {
+                filterChain.doFilter(request, response);
+                return;
             }
+            //log.info("token: {} ", accessToken);
+            Claims claims = jwtUtil.resolveClaims(request);
+
+            if(claims != null & jwtUtil.validateClaims(claims)){
+                String user = claims.getSubject();
+                Collection<GrantedAuthority> authorities = jwtUtil.extractAuthorities(claims);
+                //log.info("user : {} ", user);
+                Authentication authentication =
+                        new UsernamePasswordAuthenticationToken(user,"",authorities);
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+                //log.info("authentication : {} ", authentication);
+            }
+        }catch (Exception e){
+            log.error("Error due to: {}", e.getClass().getName() + " -> " + e.getMessage());
         }
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 }

@@ -11,6 +11,5 @@ import java.time.LocalDateTime;
 public class LibrarianResponse {
     private String name;
     private String email;
-    private String password;
     private LocalDateTime createdAt;
 }

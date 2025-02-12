@@ -1,5 +1,6 @@
 package az.developia.librarian.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -13,68 +14,53 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
-public class User implements UserDetails {
+@Table(name = "users")
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
-    @Email(message = "Email should be valid")
-    @NotNull(message = "Email cannot be null")
-    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$"
-            , message = "Email must be valid.Example: firstname-lastname@example.com  ")
+//    @Email(message = "Email should be valid")
+//    @NotNull(message = "Email cannot be null")
+//    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$"
+//            , message = "Email must be valid.Example: firstname-lastname@example.com  ")
     private String email;
     private String password;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Role role;
 
-    // One-to-Many relationship with BorrowedBook
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BorrowedBook> borrowedBooks = new ArrayList<>();
+    @JsonIgnore
+    @OneToOne(mappedBy = "user")
+    private Librarian librarian;
 
-    // One-to-Many relationship with ReturnedBook
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ReturnedBook> returnedBooks = new ArrayList<>();
+    @JsonIgnore
+    @OneToOne(mappedBy = "user")
+    private Student student;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(name = "user_authorities",
+            joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
+            inverseJoinColumns = {@JoinColumn(name = "authority_name", referencedColumnName = "name")})
+    private Set<Authority> authorities = new HashSet<>();
+
+
+
+    public User(String username, String password) {
+        this.email = username;
+        this.password = password;
     }
 
-    @Override
-    public String getUsername() {
-        return email;
-    }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return UserDetails.super.isAccountNonExpired();
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return UserDetails.super.isAccountNonLocked();
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return UserDetails.super.isCredentialsNonExpired();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return UserDetails.super.isEnabled();
-    }
 
 }

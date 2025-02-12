@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Setter
 @Getter
+@Table(name = "borrowed_books")
 public class BorrowedBook {
 
     @Id
@@ -25,7 +26,7 @@ public class BorrowedBook {
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
-    private User user; // Reference to the student borrowing the book
+    private Student student; // Reference to the student borrowing the book
 
     private LocalDateTime borrowedDate;
     private LocalDateTime dueDate;

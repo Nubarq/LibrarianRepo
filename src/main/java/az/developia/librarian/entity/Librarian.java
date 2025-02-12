@@ -1,9 +1,7 @@
 package az.developia.librarian.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @NoArgsConstructor
+@Table(name = "librarians")
 public class Librarian {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +22,9 @@ public class Librarian {
 
     private String name;
     private String email;
-    private String password;
     private LocalDateTime createdAt;
-    private Role role;
+
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }
