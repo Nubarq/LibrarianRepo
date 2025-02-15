@@ -80,11 +80,17 @@ public class SecurityConfiguration {
             "/swagger-ui.html",
             "/auth/**",
             "/h2-console/**",
-            "/librarians/**"
+            "/librarians/**",
+            "/api/borrowed-books/**",
+            "/api/books/**",
+            "/api/students/**"
+
+
     };
 
     static String[] adminUrls = {
-            "/controller/admin"
+            "/controller/admin",
+
     };
 
     static String[] clientUrls = {

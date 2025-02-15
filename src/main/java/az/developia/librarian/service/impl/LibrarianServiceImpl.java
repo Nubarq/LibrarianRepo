@@ -1,13 +1,16 @@
 package az.developia.librarian.service.impl;
 
 import az.developia.librarian.dto.request.LibrarianRequest;
+import az.developia.librarian.dto.request.StudentRequest;
 import az.developia.librarian.dto.response.LibrarianResponse;
+import az.developia.librarian.dto.response.StudentResponse;
 import az.developia.librarian.entity.Authority;
 import az.developia.librarian.entity.Librarian;
+import az.developia.librarian.entity.Student;
 import az.developia.librarian.entity.User;
 import az.developia.librarian.exeption.CustomException;
-import az.developia.librarian.mapper.LibrarianMapper;
 import az.developia.librarian.repository.LibrarianRepository;
+import az.developia.librarian.repository.StudentRepository;
 import az.developia.librarian.repository.UserRepository;
 import az.developia.librarian.service.LibrarianService;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +30,9 @@ public class LibrarianServiceImpl implements LibrarianService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final StudentRepository studentRepository;
     @Override
-    public ResponseEntity<LibrarianResponse> register(LibrarianRequest request) {
+    public ResponseEntity<LibrarianResponse> registerForLibrarian(LibrarianRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new CustomException("User already exists");
         }
@@ -45,6 +49,28 @@ public class LibrarianServiceImpl implements LibrarianService {
 
         LibrarianResponse response = new LibrarianResponse();
         modelMapper.map(librarian, response);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @Override
+    public ResponseEntity<StudentResponse> registerForStudent(StudentRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new CustomException("User already exists");
+        }
+        User user = new User(request.getEmail(), passwordEncoder.encode(request.getPassword()));
+        Authority authority = new Authority("STUDENT");
+        Set<Authority> authoritySet = Set.of(authority);
+        user.setAuthorities(authoritySet);
+        userRepository.save(user);
+
+        Student student = new Student();
+        modelMapper.map(request, student);
+        student.setUser(user);
+        studentRepository.save(student);
+
+        StudentResponse response = new StudentResponse();
+        modelMapper.map(student, response);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

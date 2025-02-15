@@ -16,4 +16,11 @@ public interface OrderService {
 
     // Optional: Get all currently borrowed books of a specific book
     public List<BorrowedBook> getCurrentlyBorrowedBooksByBook(Long bookId);
+
+    ////////////////////////////////////////////////////////////
+
+    BorrowedBook giveBookToStudent(Integer bookId, Integer studentId);
+    BorrowedBook returnBook(Integer borrowedBookId);
+
+    List<BorrowedBook> getReturnedBooks();
 }

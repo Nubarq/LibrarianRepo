@@ -1,7 +1,9 @@
 package az.developia.librarian.controller;
 
 import az.developia.librarian.dto.request.LibrarianRequest;
+import az.developia.librarian.dto.request.StudentRequest;
 import az.developia.librarian.dto.response.LibrarianResponse;
+import az.developia.librarian.dto.response.StudentResponse;
 import az.developia.librarian.service.LibrarianService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +20,13 @@ public class LibrarianController {
 
     private final LibrarianService librarianService;
 
-    @PostMapping("/register")
-    public ResponseEntity<LibrarianResponse> registration(@RequestBody @Valid LibrarianRequest request) {
-        return librarianService.register(request);
+    @PostMapping("/registerForLibrarian")
+    public ResponseEntity<LibrarianResponse> registrationForLibrarian(@RequestBody @Valid LibrarianRequest request) {
+        return librarianService.registerForLibrarian(request);
+    }
+
+    @PostMapping("/registerForStudent")
+    public ResponseEntity<StudentResponse> registrationForStudent(@RequestBody @Valid StudentRequest request) {
+        return librarianService.registerForStudent(request);
     }
 }

@@ -15,6 +15,5 @@ public class BookRequest {
     private String isbn;
     private int publicationYear;
     private int quantity;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+
 }

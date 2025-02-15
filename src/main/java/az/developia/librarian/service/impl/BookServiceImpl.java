@@ -2,11 +2,17 @@ package az.developia.librarian.service.impl;
 
 import az.developia.librarian.dto.request.BookRequest;
 import az.developia.librarian.dto.response.BookResponse;
+import az.developia.librarian.dto.response.LibrarianResponse;
 import az.developia.librarian.entity.Book;
+import az.developia.librarian.exeption.CustomException;
 import az.developia.librarian.mapper.BookMapper;
 import az.developia.librarian.repository.BookRepository;
 import az.developia.librarian.service.BookService;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,35 +20,42 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class BookServiceImpl implements BookService {
+    private final ModelMapper modelMapper;
     @Autowired
     private BookRepository bookRepository;
+
     private BookMapper mapper;
 
     // Register a new book
-    public BookResponse registerBook(BookRequest bookRequest) {
+    public ResponseEntity<BookResponse> registerBook(BookRequest bookRequest) {
         Book book = new Book();
         book.setAuthor(bookRequest.getAuthor());
         book.setIsbn(bookRequest.getIsbn());
         book.setQuantity(bookRequest.getQuantity());
         book.setTitle(bookRequest.getTitle());
         book.setPublicationYear(bookRequest.getPublicationYear());
+
+//        modelMapper.map(bookRequest,book);
         book.setCreatedAt(LocalDateTime.now());
         // Validate the book details (e.g., title, author, ISBN)
         if (book.getTitle() == null || book.getTitle().isEmpty()) {
-            throw new IllegalArgumentException("Title cannot be empty");
+            throw new CustomException("Title cannot be empty");
         }
         if (book.getAuthor() == null || book.getAuthor().isEmpty()) {
-            throw new IllegalArgumentException("Author cannot be empty");
+            throw new CustomException("Author cannot be empty");
         }
         if (book.getIsbn() == null || book.getIsbn().isEmpty()) {
-            throw new IllegalArgumentException("ISBN cannot be empty");
+            throw new CustomException("ISBN cannot be empty");
         }
 
         Book savedBook = bookRepository.save(book);
-        BookResponse bookResponse = mapper.mapBookEntityToBookResponseDTO(savedBook);
+        BookResponse bookResponse=new BookResponse();
+//        bookResponse = mapper.mapBookEntityToBookResponseDTO(savedBook);
+        modelMapper.map(savedBook,bookResponse);
         // Save the book to the database
-        return bookResponse;
+        return ResponseEntity.status(HttpStatus.CREATED).body(bookResponse);
     }
 
 
@@ -51,7 +64,7 @@ public class BookServiceImpl implements BookService {
         // Check if the book exists
         Optional<Book> bookOptional = bookRepository.findById(bookId);
         if (bookOptional.isEmpty()) {
-            throw new IllegalArgumentException("Book not found with ID: " + bookId);
+            throw new CustomException("Book not found with ID: " + bookId);
         }
 
         // Delete the book
