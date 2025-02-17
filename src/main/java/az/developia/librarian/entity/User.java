@@ -46,15 +46,8 @@ public class User {
     @OneToOne(mappedBy = "user")
     private Student student;
 
-
-    @JsonIgnore
-    @ManyToMany
-    @JoinTable(name = "user_authorities",
-            joinColumns = {@JoinColumn(name = "user_id", referencedColumnName = "id")},
-            inverseJoinColumns = {@JoinColumn(name = "authority_name", referencedColumnName = "name")})
-    private Set<Authority> authorities = new HashSet<>();
-
-
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "userId")
+    private Set<Authority> authorities;
 
     public User(String username, String password) {
         this.email = username;

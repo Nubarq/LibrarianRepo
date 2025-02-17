@@ -28,7 +28,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         List<String> roles = new ArrayList<>();
         Set<Authority> authorities = client.getAuthorities();
         for (Authority authority : authorities) {
-            roles.add(authority.getName());
+            roles.add(authority.getAuthority());
         }
         UserDetails userDetails;
         userDetails = org.springframework.security.core.userdetails.User.builder()

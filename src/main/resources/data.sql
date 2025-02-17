@@ -1,13 +1,30 @@
-INSERT INTO authorities (name) VALUES ('LIBRARIAN'), ('STUDENT');
+INSERT INTO authority_list (authority, librarian, student) VALUES
+                                                               ('DELETE_BOOK', 1, 0),
+                                                               ('EDIT_BOOK', 1, 0),
+                                                               ('SEARCH_BOOK', 1, 0),
+                                                               ('ADD_BOOK', 1, 0),
+
+                                                               ('GET_BORROWED_BOOKS_BY_STUDENT', 1, 1),
+                                                               ('GET_BORROWED_BOOKS_BY_BOOK', 1, 1),
+                                                               ('GIVE_BOOK_TO_STUDENT', 1, 0),
+                                                               ('GET_BORROWED_BOOKS', 1, 0),
+                                                               ('GET_RETURNED_BOOKS', 1, 0),
+                                                               ('RETURN_BOOK', 0, 1),
+
+                                                               ('DELETE_STUDENT', 1, 0),
+                                                               ('EDIT_STUDENT', 1, 0),
+                                                               ('SEARCH_STUDENTS', 1, 0),
+                                                               ('ADD_STUDENT', 1, 0);
 
 -- Insert users
 INSERT INTO users (email, password, created_at, updated_at) VALUES
                                                                            ('librarian1@gmail.com', '$2a$12$Fepv69GcYqnJTHIYN3xf7upIdjuzWuJai/Vha0AfPlDSrR5C5QErC', '2024-07-15 10:30:00', '2024-07-20 12:00:00'), --1234
                                                                            ('student1@gmail.com', '$2a$12$Fepv69GcYqnJTHIYN3xf7upIdjuzWuJai/Vha0AfPlDSrR5C5QErC', '2024-06-10 09:15:00', '2024-06-18 14:45:00');
+INSERT INTO authorities (user_id, authority)
+SELECT 1, authority FROM authority_list WHERE librarian = 1;
 
-insert into user_authorities(user_id, authority_name)
-values (1, 'LIBRARIAN'),
-       (2, 'STUDENT');
+INSERT INTO authorities (user_id, authority)
+SELECT 2, authority FROM authority_list WHERE student = 1;
 
 -- Insert librarians
 INSERT INTO librarians (name, email, created_at, user_id) VALUES

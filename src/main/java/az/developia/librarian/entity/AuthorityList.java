@@ -4,23 +4,24 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
-@Table(name = "authorities")
+@Table(name = "authority_list")
 @Data
-@ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class Authority {
+public class AuthorityList {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long userId;
+    @Column(nullable = false, unique = true)
+    private String authority;
 
     @Column(nullable = false)
-    private String authority;
+    private Integer librarian;
+
+    @Column(nullable = false)
+    private Integer student;
 }

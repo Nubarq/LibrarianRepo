@@ -6,9 +6,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,6 +21,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
+@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration {
 
     @Bean
@@ -50,8 +55,13 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         authorize -> authorize
                                 .requestMatchers(permitAllUrls).permitAll()
-                                .requestMatchers(adminUrls).hasAnyAuthority("LIBRARIAN")
-                                .requestMatchers(clientUrls).hasAnyAuthority("STUDENT")
+                                .requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                                .requestMatchers("/api/books/**").authenticated()
+                                .requestMatchers("/api/borrowed-books/**").authenticated()
+                                .requestMatchers("/api/students/**").authenticated()
+                                .requestMatchers("/api/librarians/registerForStudent").authenticated()
+                                //.requestMatchers(adminUrls).hasAnyAuthority("LIBRARIAN")
+                                //.requestMatchers(clientUrls).hasAnyAuthority("STUDENT")
                                 .requestMatchers(anyAuthUrls).authenticated()
 
 //                                .anyRequest().authenticated()
@@ -78,12 +88,12 @@ public class SecurityConfiguration {
             "/configuration/ui",
             "/swagger-ui/**",
             "/swagger-ui.html",
-            "/auth/**",
-            "/h2-console/**",
-            "/librarians/**",
-            "/api/borrowed-books/**",
-            "/api/books/**",
-            "/api/students/**"
+            "/h2-console/**"
+//            "/librarians/**",
+//            "/api/borrowed-books/**",
+//            "/api/books/**",
+//            "/api/students/**",
+            //"/auth/**",
 
 
     };

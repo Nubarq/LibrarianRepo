@@ -8,13 +8,14 @@ import az.developia.librarian.service.LibrarianService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/librarians")
+@RequestMapping("/api/librarians")
 @RequiredArgsConstructor
 public class LibrarianController {
 
@@ -26,6 +27,7 @@ public class LibrarianController {
     }
 
     @PostMapping("/registerForStudent")
+    @PreAuthorize("hasAuthority('ADD_STUDENT')")
     public ResponseEntity<StudentResponse> registrationForStudent(@RequestBody @Valid StudentRequest request) {
         return librarianService.registerForStudent(request);
     }

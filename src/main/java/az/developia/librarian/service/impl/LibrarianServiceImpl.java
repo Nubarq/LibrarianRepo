@@ -9,6 +9,7 @@ import az.developia.librarian.entity.Librarian;
 import az.developia.librarian.entity.Student;
 import az.developia.librarian.entity.User;
 import az.developia.librarian.exeption.CustomException;
+import az.developia.librarian.repository.AuthorityRepository;
 import az.developia.librarian.repository.LibrarianRepository;
 import az.developia.librarian.repository.StudentRepository;
 import az.developia.librarian.repository.UserRepository;
@@ -31,21 +32,21 @@ public class LibrarianServiceImpl implements LibrarianService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private final StudentRepository studentRepository;
+    private final AuthorityRepository authorityRepository;
     @Override
     public ResponseEntity<LibrarianResponse> registerForLibrarian(LibrarianRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new CustomException("User already exists");
         }
         User user = new User(request.getEmail(), passwordEncoder.encode(request.getPassword()));
-        Authority authority = new Authority("LIBRARIAN");
-        Set<Authority> authoritySet = Set.of(authority);
-        user.setAuthorities(authoritySet);
         userRepository.save(user);
 
         Librarian librarian = new Librarian();
         modelMapper.map(request, librarian);
         librarian.setUser(user);
         librarianRepository.save(librarian);
+
+        authorityRepository.addLibrarianAuthorities(user.getId());
 
         LibrarianResponse response = new LibrarianResponse();
         modelMapper.map(librarian, response);
@@ -59,15 +60,14 @@ public class LibrarianServiceImpl implements LibrarianService {
             throw new CustomException("User already exists");
         }
         User user = new User(request.getEmail(), passwordEncoder.encode(request.getPassword()));
-        Authority authority = new Authority("STUDENT");
-        Set<Authority> authoritySet = Set.of(authority);
-        user.setAuthorities(authoritySet);
         userRepository.save(user);
 
         Student student = new Student();
         modelMapper.map(request, student);
         student.setUser(user);
         studentRepository.save(student);
+
+        authorityRepository.addStudentAuthorities(user.getId());
 
         StudentResponse response = new StudentResponse();
         modelMapper.map(student, response);
